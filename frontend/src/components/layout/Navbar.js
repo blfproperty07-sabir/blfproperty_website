@@ -28,11 +28,11 @@ const Navbar = () => {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/properties?listingType=sale', label: 'For Buyers' },
-    { path: '/properties?listingType=rent', label: 'For Tenants' },
+    { path: '/properties?listingType=rent', label: 'Local Rent' },
     { path: '/properties', label: 'Latest Properties' },
     { path: '/about', label: 'About Us' },
     { path: '/contact', label: 'Contact' },
-    { path: '/insights', label: 'Insights', badge: 'NEW' },
+    { path: '/insights', label: 'Construction', badge: 'NEW' },
   ];
 
   return (

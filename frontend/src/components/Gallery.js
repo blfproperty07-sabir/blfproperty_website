@@ -30,7 +30,7 @@ const Gallery = () => {
       description: 'Large independent house perfect for big families'
     },
     {
-      src: '/image/Office Space.avif',
+      src: '/image/Office.jpg',
       title: 'Commercial Office Space',
       description: 'Modern office spaces for businesses'
     },

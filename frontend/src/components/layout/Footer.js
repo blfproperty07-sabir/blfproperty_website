@@ -35,28 +35,28 @@ const Footer = () => {
               <button 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="Facebook"
-                onClick={() => window.open('https://facebook.com', '_blank')}
+                onClick={() => window.open('https://www.facebook.com/share/1A6tWYeXsE', '_blank')}
               >
                 <FiFacebook className="w-5 h-5" />
               </button>
               <button 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
-                aria-label="Twitter"
-                onClick={() => window.open('https://twitter.com', '_blank')}
+                aria-label="You Tube"
+                onClick={() => window.open('https://youtube.com/@eazypropertysolution?si=bDK3jOoi9iDX1t7B', '_blank')}
               >
                 <FiTwitter className="w-5 h-5" />
               </button>
               <button 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="Instagram"
-                onClick={() => window.open('https://instagram.com', '_blank')}
+                onClick={() => window.open('https://www.instagram.com/bihar_property_solution?igsh=bnF0dW9iNDNvenV4', '_blank')}
               >
                 <FiInstagram className="w-5 h-5" />
               </button>
               <button 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="LinkedIn"
-                onClick={() => window.open('https://linkedin.com', '_blank')}
+                onClick={() => window.open('https://www.linkedin.com/in/sanni-kumar-gupta-10792b290?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app', '_blank')}
               >
                 <FiLinkedin className="w-5 h-5" />
               </button>
@@ -111,27 +111,28 @@ const Footer = () => {
               <div className="flex items-start space-x-3">
                 <FiMapPin className="w-5 h-5 text-primary-400 mt-0.5 flex-shrink-0" />
                 <p className="text-gray-300 text-sm">
-                  123 Property Street<br />
-                  Real Estate City<br />
-                  State - 123456
+                  Bhagwanpur behind hotel kailash<br />
+                  tower muzaffarpur<br />
+                   Bihar 842001
                 </p>
               </div>
               <div className="flex items-center space-x-3">
                 <FiPhone className="w-5 h-5 text-primary-400 flex-shrink-0" />
                 <a 
-                  href="tel:+919876543210" 
+                  href="tel:+917033576717" 
                   className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
                 >
-                  +91 98765 43210
+                  +91 7033576717
+                  +919708402172
                 </a>
               </div>
               <div className="flex items-center space-x-3">
                 <FiMail className="w-5 h-5 text-primary-400 flex-shrink-0" />
                 <a 
-                  href="mailto:contact@eazyproperty.com" 
+                  href="easypropertysolution123@gmail.com" 
                   className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
                 >
-                  contact@eazyproperty.com
+                  easypropertysolution123@gmail.com
                 </a>
               </div>
             </div>
@@ -145,6 +146,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm text-center md:text-left">
               © {new Date().getFullYear()} Eazy Property Solution & Construction. All rights reserved.
+             
             </div>
             
             <div className="flex items-center space-x-6">

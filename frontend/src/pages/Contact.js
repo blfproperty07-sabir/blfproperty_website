@@ -125,8 +125,8 @@ const Contact = () => {
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Office Address</h3>
                     <p className="text-gray-600">
                       Eazy Property Solution & Construction<br />
-                      Main Street, Business District<br />
-                      City, State - 123456
+                       Bhagwanpur behind hotel kailash tower <br />
+                      Muzaffarpur Bihar 842001
                     </p>
                   </div>
                 </div>
@@ -140,8 +140,8 @@ const Contact = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Phone Number</h3>
                     <p className="text-gray-600">
-                      <a href="tel:8579037260" className="hover:text-primary-600 transition-colors">
-                        +91 8579037260
+                      <a href="tel:7033576717" className="hover:text-primary-600 transition-colors">
+                        +91 7033576717
                       </a>
                     </p>
                     <p className="text-sm text-gray-500">Available 9 AM - 8 PM</p>
@@ -157,8 +157,8 @@ const Contact = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Email Address</h3>
                     <p className="text-gray-600">
-                      <a href="mailto:sannikumargupta@gmail.com" className="hover:text-primary-600 transition-colors">
-                        sannikumargupta@gmail.com
+                      <a href="mailto:easypropertysolution123@gmail.com" className="hover:text-primary-600 transition-colors">
+                        easypropertysolution123@gmail.com
                       </a>
                     </p>
                     <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
@@ -186,12 +186,12 @@ const Contact = () => {
               <div className="bg-primary-50 p-6 rounded-lg border border-primary-200">
                 <div className="flex items-center space-x-4">
                   <img 
-                    src="/image/companyboss.jpg"
+                    src="/image/companyboss1.jpg"
                     alt="Sanni Kumar Gupta"
                     className="w-16 h-16 rounded-full object-cover border-2 border-primary-300"
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Sanni Kumar Gupta</h3>
+                    <h3 className="text-lg font-semibold text-gray-800">Inzamam Asad</h3>
                     <p className="text-primary-600 font-medium">CEO & Founder</p>
                     <p className="text-sm text-gray-600">Direct contact for premium clients</p>
                   </div>

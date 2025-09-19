@@ -77,11 +77,11 @@ const About = () => {
   };
 
   const bossProfile = {
-    name: "Sanni Kumar Gupta",
+    name: "Inzamam Asad",
     position: "CEO & Founder",
-    email: "sannikumargupta@gmail.com",
-    phone: "8579037260",
-    image: "/image/companyboss.jpg",
+    email: "easypropertysolution123@gmail.com",
+    phone: "7033576717 /      9708402172",
+    image: "/image/companyboss1.jpg",
     description: "Leading Eazy Property Solution & Construction with over 10 years of experience in real estate development and property solutions. Committed to providing quality properties and exceptional customer service.",
     experience: "10+ Years",
     projects: "500+ Projects",

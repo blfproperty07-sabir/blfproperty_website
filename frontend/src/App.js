@@ -18,6 +18,7 @@ import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Insights from './pages/Insights';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -52,12 +53,10 @@ function App() {
               
               <main className="flex-grow">
                 <Routes>
-                  {/* Public Routes */}
+                  {/* Public Routes - Home, About, and Insights are accessible without login */}
                   <Route path="/" element={<Home />} />
-                  <Route path="/properties" element={<Properties />} />
-                  <Route path="/properties/:id" element={<PropertyDetail />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/insights" element={<Insights />} />
                   
                   {/* Auth Routes (only accessible when not logged in) */}
                   <Route path="/login" element={
@@ -76,7 +75,24 @@ function App() {
                     </PublicRoute>
                   } />
                   
-                  {/* Protected Routes (require authentication) */}
+                  {/* Protected Routes (require authentication) - All pages except Home, About, and Insights */}
+                  <Route path="/properties" element={
+                    <ProtectedRoute>
+                      <Properties />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/properties/:id" element={
+                    <ProtectedRoute>
+                      <PropertyDetail />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/contact" element={
+                    <ProtectedRoute>
+                      <Contact />
+                    </ProtectedRoute>
+                  } />
+                  
+                  {/* User specific protected routes */}
                   <Route path="/profile" element={
                     <ProtectedRoute>
                       <Profile />
