@@ -251,7 +251,7 @@ const Properties = () => {
                       </div>
                       
                       <Link 
-                        to={`/property/${property._id}`}
+                        to={`/properties/${property._id}`}
                         className="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition-colors"
                       >
                         View Details

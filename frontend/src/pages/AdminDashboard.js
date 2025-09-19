@@ -23,6 +23,17 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [showAddRentalModal, setShowAddRentalModal] = useState(false);
+  
+  // Contact Inquiries state
+  const [inquiries, setInquiries] = useState([]);
+  const [inquiriesLoading, setInquiriesLoading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState(null);
+  const [inquiriesStats, setInquiriesStats] = useState({
+    total: 0,
+    new: 0,
+    inProgress: 0,
+    resolved: 0
+  });
 
   useEffect(() => {
     if (user?.role === 'admin') {
@@ -54,6 +65,13 @@ const AdminDashboard = () => {
     // Refetch rental properties when Rentals tab is selected
     if (user?.role === 'admin' && activeTab === 'rentals') {
       fetchRentalProperties();
+    }
+  }, [activeTab, user]);
+
+  useEffect(() => {
+    // Fetch contact inquiries when Contacts tab is selected
+    if (user?.role === 'admin' && activeTab === 'contacts') {
+      fetchContactInquiries();
     }
   }, [activeTab, user]);
 
@@ -151,6 +169,65 @@ const AdminDashboard = () => {
       setTeamMembers([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Contact Inquiries functions
+  const fetchContactInquiries = async () => {
+    setInquiriesLoading(true);
+    try {
+      const response = await adminService.getAllInquiries({
+        page: 1,
+        limit: 20,
+        sortBy: 'createdAt',
+        sortOrder: 'desc'
+      });
+      
+      const inquiries = response.data?.inquiries || [];
+      setInquiries(inquiries);
+      
+      // Calculate stats
+      const stats = {
+        total: inquiries.length,
+        new: inquiries.filter(i => i.status === 'new').length,
+        inProgress: inquiries.filter(i => i.status === 'in-progress').length,
+        resolved: inquiries.filter(i => i.status === 'resolved').length
+      };
+      setInquiriesStats(stats);
+      
+    } catch (error) {
+      console.error('Error fetching contact inquiries:', error);
+      toast.error('Failed to load contact inquiries');
+      setInquiries([]);
+    } finally {
+      setInquiriesLoading(false);
+    }
+  };
+
+  const handleInquiryStatusUpdate = async (inquiryId, newStatus) => {
+    setUpdatingStatus(inquiryId);
+    try {
+      await adminService.updateInquiryStatus(inquiryId, newStatus);
+      toast.success('Inquiry status updated successfully');
+      fetchContactInquiries(); // Refresh the list
+    } catch (error) {
+      console.error('Error updating inquiry status:', error);
+      toast.error(error.response?.data?.message || 'Failed to update inquiry status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
+  const handleInquiryDelete = async (inquiryId) => {
+    if (window.confirm('Are you sure you want to delete this inquiry?')) {
+      try {
+        await adminService.deleteInquiry(inquiryId);
+        toast.success('Inquiry deleted successfully');
+        fetchContactInquiries(); // Refresh the list
+      } catch (error) {
+        console.error('Error deleting inquiry:', error);
+        toast.error('Failed to delete inquiry');
+      }
     }
   };
 
@@ -981,6 +1058,170 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === 'contacts' && (
+          <div className="space-y-6">
+            {/* Contact Inquiries Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Total Inquiries</p>
+                    <p className="text-2xl font-bold text-gray-900">{inquiriesStats.total}</p>
+                  </div>
+                  <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+                    📧
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">New Inquiries</p>
+                    <p className="text-2xl font-bold text-orange-600">{inquiriesStats.new}</p>
+                  </div>
+                  <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
+                    🆕
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">In Progress</p>
+                    <p className="text-2xl font-bold text-yellow-600">{inquiriesStats.inProgress}</p>
+                  </div>
+                  <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+                    ⏳
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-600 text-sm">Resolved</p>
+                    <p className="text-2xl font-bold text-green-600">{inquiriesStats.resolved}</p>
+                  </div>
+                  <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+                    ✅
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Contact Inquiries List */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Contact Inquiries</h3>
+                    <p className="text-gray-600">Manage and respond to customer inquiries</p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
+                {inquiriesLoading ? (
+                  <div className="text-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600 mx-auto"></div>
+                    <p className="text-gray-600 mt-4">Loading inquiries...</p>
+                  </div>
+                ) : inquiries.length === 0 ? (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">📧</div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No inquiries yet</h3>
+                    <p className="text-gray-600">Contact inquiries will appear here when submitted</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Contact Details
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Subject & Message
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {inquiries.map((inquiry) => (
+                          <tr key={inquiry._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">{inquiry.name}</div>
+                                <div className="text-sm text-gray-500">{inquiry.email}</div>
+                                <div className="text-sm text-gray-500">{inquiry.phone}</div>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div>
+                                <div className="text-sm font-medium text-gray-900 mb-1">{inquiry.subject}</div>
+                                <div className="text-sm text-gray-500 max-w-xs truncate">{inquiry.message}</div>
+                                {inquiry.type && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 mt-1">
+                                    {inquiry.type}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <select
+                                value={inquiry.status}
+                                onChange={(e) => handleInquiryStatusUpdate(inquiry._id, e.target.value)}
+                                disabled={updatingStatus === inquiry._id}
+                                className={`text-sm rounded-full px-3 py-1 cursor-pointer transition-colors ${
+                                  updatingStatus === inquiry._id ? 'opacity-50 cursor-not-allowed' : ''
+                                } ${
+                                  inquiry.status === 'new' ? 'bg-orange-100 text-orange-800 border border-orange-200' :
+                                  inquiry.status === 'in-progress' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                                  inquiry.status === 'resolved' ? 'bg-green-100 text-green-800 border border-green-200' :
+                                  'bg-gray-100 text-gray-800 border border-gray-200'
+                                }`}
+                              >
+                                <option value="new">New</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="resolved">Resolved</option>
+                                <option value="closed">Closed</option>
+                              </select>
+                              {updatingStatus === inquiry._id && (
+                                <div className="text-xs text-gray-500 mt-1">Updating...</div>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {new Date(inquiry.createdAt).toLocaleDateString('en-US', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric'
+                              })}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleInquiryDelete(inquiry._id)}
+                                className="text-red-600 hover:text-red-900 ml-4"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

@@ -15,64 +15,19 @@ const About = () => {
   }, []);
 
   const fetchTeamMembers = async () => {
-    console.log('🚀 Starting fetchTeamMembers...');
-    
     try {
-      console.log('📡 Making API call to fetch team members...');
+      const response = await fetch('http://localhost:5000/api/team/about');
+      const data = await response.json();
       
-      // Make direct fetch call to bypass any service issues
-      const directResponse = await fetch('http://localhost:5000/api/team/about', {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      console.log('📡 API Response status:', directResponse.status);
-      
-      if (!directResponse.ok) {
-        throw new Error(`API call failed with status: ${directResponse.status}`);
+      if (data.success) {
+        const boss = data.data?.boss;
+        const members = data.data?.teamMembers || [];
+        const allMembers = boss ? [boss, ...members] : members;
+        setTeamMembers(allMembers);
       }
-      
-      const directData = await directResponse.json();
-      console.log('📡 API Response data:', directData);
-      
-      if (!directData.success) {
-        throw new Error('API returned success: false');
-      }
-      
-      const boss = directData.data?.boss;
-      const members = directData.data?.teamMembers || [];
-      
-      console.log('👤 Boss data:', boss);
-      console.log('👥 Team members data:', members);
-      console.log('👥 Number of team members:', members.length);
-      
-      // Combine boss and team members if boss exists
-      const allMembers = boss ? [boss, ...members] : members;
-      
-      console.log('✅ Final team members for About page:', allMembers);
-      console.log('✅ Number of final members:', allMembers.length);
-      
-      // Always set the state with API data, even if empty array
-      console.log('✅ Setting team members state with API data');
-      setTeamMembers(allMembers);
-      
-      // Log each member's image path for debugging
-      allMembers.forEach((member, index) => {
-        console.log(`👤 Member ${index + 1}: ${member.name} -> ProfileImage: ${member.profileImage}`);
-      });
-      
-      console.log('✅ State updated - using real team member data from API');
-      
     } catch (error) {
-      console.error('❌ Error fetching team members:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
-      console.log('❌ API failed - setting empty array');
-      setTeamMembers([]); // Set empty array on error
+      console.error('Error fetching team members:', error);
+      setTeamMembers([]);
     }
   };
 
@@ -280,43 +235,21 @@ const About = () => {
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Meet our dedicated professionals who make your property dreams come true
             </p>
-            {/* Debug indicator */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className={`mt-4 p-2 rounded text-sm ${teamMembers.length > 0 ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                {teamMembers.length > 0 ? `✅ Showing ${teamMembers.length} real team members from API` : '⚠️ No team members loaded - check API connection'}
-                <div className="text-xs mt-1">
-                  API State: {JSON.stringify(teamMembers.map(m => ({name: m.name, profileImage: m.profileImage})))}
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {allTeamMembers.length > 0 ? (
-              allTeamMembers.map((member, index) => {
-                // Generate unique key to force re-render
-                const uniqueKey = `${member._id || member.name || index}-${Date.now()}-${Math.random()}`;
-                
-                // Debug logging for each team member
-                console.log(`👤 === TEAM MEMBER ${index + 1} DEBUG ===`);
-                console.log(`👤 Name: ${member.name}`);
-                console.log(`👤 profileImage:`, member.profileImage);
-                console.log(`👤 image:`, member.image);
-                console.log(`👤 Full member object:`, member);
-                console.log(`👤 ==============================`);
-                
-                return (
-                  <div key={uniqueKey} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                    <div className="h-64 overflow-hidden">
-                      <img
-                        src={getTeamMemberImageUrl(member.profileImage || member.image, true)}
-                        alt={member.name}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                        onError={handleImageError}
-                        onLoad={() => handleImageLoad(member.name)}
-                        key={`${member._id || member.name}-${Date.now()}`}
-                      />
-                    </div>
+              allTeamMembers.map((member, index) => (
+                <div key={member._id || index} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
+                  <div className="h-64 overflow-hidden">
+                    <img
+                      src={getTeamMemberImageUrl(member.profileImage)}
+                      alt={member.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                      onError={handleImageError}
+                      onLoad={() => handleImageLoad(member.name)}
+                    />
+                  </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{member.name}</h3>
                     <p className="text-primary-600 font-semibold mb-3">{member.position}</p>
@@ -375,8 +308,7 @@ const About = () => {
                     </div>
                   </div>
                 </div>
-                );
-              })
+              ))
             ) : (
               <div className="col-span-full text-center py-12">
                 <div className="text-6xl mb-4">👥</div>

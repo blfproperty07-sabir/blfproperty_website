@@ -271,7 +271,7 @@ const Dashboard = () => {
                           <div className="flex space-x-3">
                             {property.status === 'approved' && (
                               <a
-                                href={`/property/${property._id}`}
+                                href={`/properties/${property._id}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-blue-600 hover:text-blue-800 text-sm font-medium"

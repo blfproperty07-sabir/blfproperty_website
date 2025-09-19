@@ -835,6 +835,34 @@ router.patch('/inquiries/:id/assign', requireAdmin, [
   }
 });
 
+// Delete inquiry
+router.delete('/inquiries/:id', requireAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const inquiry = await Contact.findByIdAndDelete(id);
+
+    if (!inquiry) {
+      return res.status(404).json({
+        success: false,
+        message: 'Inquiry not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      message: 'Inquiry deleted successfully'
+    });
+
+  } catch (error) {
+    console.error('Delete inquiry error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error deleting inquiry'
+    });
+  }
+});
+
 // Get system statistics
 router.get('/stats', requireAdmin, async (req, res) => {
   try {

@@ -146,6 +146,15 @@ const adminService = {
     return response.data;
   },
 
+  updateInquiryStatus: async (inquiryId, status, response = null) => {
+    const data = { status };
+    if (response) {
+      data.response = response;
+    }
+    const apiResponse = await adminAPI.patch(`/inquiries/${inquiryId}/status`, data);
+    return apiResponse.data;
+  },
+
   deleteInquiry: async (inquiryId) => {
     const response = await adminAPI.delete(`/inquiries/${inquiryId}`);
     return response.data;
