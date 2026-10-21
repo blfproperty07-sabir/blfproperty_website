@@ -106,7 +106,7 @@ const HeroSection = ({
     <section className="relative isolate min-h-[780px] overflow-hidden bg-[#111B3C] sm:min-h-[820px]">
       <div
         className="absolute inset-0 -z-20 bg-cover bg-center"
-        style={{ backgroundImage: "url('/image/herosection.png')" }}
+        style={{ backgroundImage: "url('/image/herosection.webp')" }}
         aria-hidden="true"
       />
 
