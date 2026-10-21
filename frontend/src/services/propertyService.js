@@ -1,33 +1,24 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
-// Create axios instance with default config
 const propertyAPI = axios.create({
   baseURL: `${API_URL}/properties`,
-  headers: {
-    'Content-Type': 'application/json',
-  },
+  headers: { Accept: 'application/json' }
 });
 
-// Add token to requests
 propertyAPI.interceptors.request.use(
-  (config) => {
+  config => {
     const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    if (token) config.headers.Authorization = `Bearer ${token}`;
     return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  error => Promise.reject(error)
 );
 
-// Response interceptor for error handling
 propertyAPI.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
       window.location.href = '/login';
@@ -37,100 +28,47 @@ propertyAPI.interceptors.response.use(
 );
 
 const propertyService = {
-  // Get all properties (public)
-  getProperties: async (params = {}) => {
-    const response = await propertyAPI.get('/', { params });
-    return response.data;
-  },
+  getProperties: async (params = {}) =>
+    (await propertyAPI.get('/', { params })).data,
 
-  // Get property by ID (public)
-  getPropertyById: async (id) => {
-    const response = await propertyAPI.get(`/${id}`);
-    return response.data;
-  },
+  getPropertyById: async id =>
+    (await propertyAPI.get(`/${id}`)).data,
 
-  // Search properties (public)
-  searchProperties: async (searchData) => {
-    const response = await propertyAPI.post('/search', searchData);
-    return response.data;
-  },
+  searchProperties: async searchData =>
+    (await propertyAPI.post('/search', searchData)).data,
 
-  // Express interest in property (authenticated)
-  expressInterest: async (propertyId, message = '') => {
-    const response = await propertyAPI.post(`/${propertyId}/interest`, { message });
-    return response.data;
-  },
+  expressInterest: async (propertyId, message = '') =>
+    (await propertyAPI.post(`/${propertyId}/interest`, { message })).data,
 
-  // Create property (authenticated - seller/admin)
-  createProperty: async (propertyData) => {
-    const response = await propertyAPI.post('/', propertyData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
+  createProperty: async propertyData =>
+    (await propertyAPI.post('/', propertyData)).data,
 
-  // Update property (authenticated - owner/admin)
-  updateProperty: async (id, propertyData) => {
-    const response = await propertyAPI.put(`/${id}`, propertyData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
+  updateProperty: async (id, propertyData) =>
+    (await propertyAPI.put(`/${id}`, propertyData)).data,
 
-  // Delete property (authenticated - owner/admin)
-  deleteProperty: async (id) => {
-    const response = await propertyAPI.delete(`/${id}`);
-    return response.data;
-  },
+  deleteProperty: async id =>
+    (await propertyAPI.delete(`/${id}`)).data,
 
-  // Get user's properties (authenticated)
-  getUserProperties: async () => {
-    const response = await propertyAPI.get('/user/my-properties');
-    return response.data;
-  },
+  getUserProperties: async () =>
+    (await propertyAPI.get('/user/my-properties')).data,
 
-  // Get all properties (including status filter for internal use)
-  getAllProperties: async (filters = {}) => {
-    const response = await propertyAPI.get('/', { params: filters });
-    return response.data;
-  },
+  getAllProperties: async (filters = {}) =>
+    (await propertyAPI.get('/', { params: filters })).data,
 
-  // Get property analytics (authenticated - owner/admin)
-  getPropertyAnalytics: async (id) => {
-    const response = await propertyAPI.get(`/${id}/analytics`);
-    return response.data;
-  },
+  getPropertyAnalytics: async id =>
+    (await propertyAPI.get(`/${id}/analytics`)).data,
 
-  // Upload property images
   uploadImages: async (propertyId, images) => {
     const formData = new FormData();
-    images.forEach((image) => {
-      formData.append('images', image);
-    });
-
-    const response = await propertyAPI.post(`/${propertyId}/images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
+    images.forEach(image => formData.append('images', image));
+    return (await propertyAPI.post(`/${propertyId}/images`, formData)).data;
   },
 
-  // Delete property image
-  deleteImage: async (propertyId, imageId) => {
-    const response = await propertyAPI.delete(`/${propertyId}/images/${imageId}`);
-    return response.data;
-  },
+  deleteImage: async (propertyId, imageId) =>
+    (await propertyAPI.delete(`/${propertyId}/images/${imageId}`)).data,
 
-  // Get property statistics
-  getPropertyStats: async () => {
-    const response = await propertyAPI.get('/statistics');
-    return response.data;
-  },
+  getPropertyStats: async () =>
+    (await propertyAPI.get('/statistics')).data
 };
 
 export default propertyService;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -85,12 +85,12 @@ const AddProperty = () => {
 
     // Validate file types and sizes
     const validFiles = files.filter(file => {
-      if (!file.type.startsWith('image/')) {
-        toast.error(`${file.name} is not a valid image file`);
+      if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+        toast.error(`${file.name} must be a JPEG, PNG, GIF, or WebP image.`);
         return false;
       }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error(`${file.name} is too large. Maximum size is 5MB`);
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error(`${file.name} is too large. Maximum size is 10 MB.`);
         return false;
       }
       return true;
@@ -149,14 +149,18 @@ const AddProperty = () => {
         submitData.append('images', image);
       });
 
-      const response = await propertyService.createProperty(submitData);
-      
+      await propertyService.createProperty(submitData);
+
       toast.success('Property submitted successfully! It will be reviewed and published soon.');
       navigate('/properties');
       
     } catch (error) {
-      console.error('Property submission error:', error);
-      toast.error(error.response?.data?.message || 'Failed to submit property');
+      console.error('Property submission error:', error.response?.status || error.message);
+      toast.error(
+        error.response?.data?.message ||
+        error.message ||
+        'Could not submit the property. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -223,6 +227,8 @@ const AddProperty = () => {
                     <option value="plot">Plot/Land</option>
                     <option value="commercial">Commercial Space</option>
                     <option value="office">Office Space</option>
+                    <option value="shop">Shop/Showroom</option>
+                    <option value="warehouse">Warehouse</option>
                   </select>
                 </div>
 
@@ -240,12 +246,13 @@ const AddProperty = () => {
                   >
                     <option value="sale">For Sale</option>
                     <option value="rent">For Rent</option>
+                    <option value="lease">For Lease</option>
                   </select>
                 </div>
 
                 <div>
                   <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
-                    Price (₹) *
+                    {formData.category === 'rent' ? 'Monthly Rent (â‚¹) *' : 'Price (â‚¹) *'}
                   </label>
                   <input
                     type="number"
@@ -482,7 +489,7 @@ const AddProperty = () => {
                   <input
                     type="file"
                     id="images"
-                    accept="image/*"
+                    accept=".jpg,.jpeg,.png,.gif,.webp"
                     multiple
                     onChange={handleImageChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
@@ -506,7 +513,7 @@ const AddProperty = () => {
                           onClick={() => removeImage(index)}
                           className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
                         >
-                          ×
+                          Ã—
                         </button>
                         {index === 0 && (
                           <span className="absolute bottom-2 left-2 bg-primary-500 text-white text-xs px-2 py-1 rounded">

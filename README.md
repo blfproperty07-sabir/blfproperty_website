@@ -1,4 +1,4 @@
-# Eazy Property Solution
+# BLF Property
 
 A full-stack property management system built with React.js and Node.js.
 
@@ -73,19 +73,27 @@ Create a `.env` file in the backend directory:
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret_key
 NODE_ENV=development
-PORT=5000
+PORT=5001
+DEFAULT_ADMIN_EMAIL=admin@example.com
+DEFAULT_ADMIN_PASSWORD=replace_with_a_unique_password
+GOOGLE_CLIENT_ID=your_google_oauth_web_client_id
+CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 ```
 
-## Default Admin Credentials
+The server creates an initial admin account only when both admin variables are set. Use a unique password and keep these values out of source control. Run `node seedDatabase.js --admin-only` from the backend directory to create or reset the configured admin account without reseeding sample data.
 
-- **Email**: sannikumargupta43@gmail.com
-- **Password**: sanni@123
+To enable Google sign-in, create a Google OAuth **Web application** client ID and set it as `GOOGLE_CLIENT_ID` in `backend/.env`. The frontend loads this public client ID from the backend at runtime, so no frontend environment variable is needed. Add the frontend origin (for example, `http://localhost:3000`) to the OAuth client's authorized JavaScript origins. The server verifies Google ID tokens; a client secret is not required.
+
+Property photos and team profile images are uploaded to Cloudinary using the three Cloudinary variables above. The backend stores Cloudinary secure image URLs and public IDs in MongoDB, keeps uploads in memory rather than on the server's local disk, and removes newly uploaded images if the database write fails. Keep the Cloudinary API secret only in `backend/.env`, never commit environment backup files, and restart the backend after changing credentials. Image uploads accept JPEG, PNG, GIF, and WebP files up to 10 MB each.
 
 ## API Endpoints
 
 ### Authentication
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - User login
+- `POST /api/auth/google` - Sign in or register with a verified Google account
 - `GET /api/auth/profile` - Get user profile
 
 ### Properties

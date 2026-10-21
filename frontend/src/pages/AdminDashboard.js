@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import adminService from '../services/adminService';
 import teamService from '../services/teamService';
+import { getTeamMemberImageUrl } from '../utils/imageUtils';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -23,6 +24,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [showAddTeamModal, setShowAddTeamModal] = useState(false);
   const [showAddRentalModal, setShowAddRentalModal] = useState(false);
+  const [isAddingRental, setIsAddingRental] = useState(false);
   
   // Contact Inquiries state
   const [inquiries, setInquiries] = useState([]);
@@ -149,17 +151,13 @@ const AdminDashboard = () => {
       
       // Set data - Access properties and teamMembers arrays correctly
       const properties = pendingRes.data?.properties || [];
-      const boss = teamRes.data?.boss;
       const members = teamRes.data?.teamMembers || [];
-      
-      // Combine boss and team members for admin dashboard
-      const allTeamMembers = boss ? [boss, ...members] : members;
-      
+
       console.log('Setting pending properties:', properties);
-      console.log('Setting team members:', allTeamMembers);
-      
+      console.log('Setting team members:', members);
+
       setPendingProperties(properties);
-      setTeamMembers(allTeamMembers);
+      setTeamMembers(members);
       
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
@@ -323,25 +321,13 @@ const AdminDashboard = () => {
       // Add additional fields that might not be in form
       formData.append('joiningDate', new Date().toISOString());
       
-      // Check if file is attached
-      const fileInput = e.target.querySelector('input[name="profileImage"]');
-      if (fileInput && fileInput.files && fileInput.files[0]) {
-        console.log('Profile image file selected:', fileInput.files[0].name, 'Size:', fileInput.files[0].size);
-      } else {
-        console.log('No profile image file selected');
-      }
-      
-      console.log('Form data being sent:');
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(key, `File: ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(key, value);
-        }
+      const profileImage = formData.get('profileImage');
+      if (profileImage instanceof File && profileImage.size > 10 * 1024 * 1024) {
+        toast.error('The team profile image must be 10 MB or smaller.');
+        return;
       }
       
       const response = await teamService.createTeamMember(formData);
-      console.log('Team member creation response:', response);
       toast.success('Team member added successfully');
       setTeamMembers(prev => [...prev, response.data.teamMember]);
       setStats(prev => ({ ...prev, totalTeamMembers: prev.totalTeamMembers + 1 }));
@@ -350,7 +336,7 @@ const AdminDashboard = () => {
       // Reset form
       e.target.reset();
     } catch (error) {
-      console.error('Error adding team member:', error.response?.data || error);
+      console.error('Error adding team member:', error.response?.status || error.message);
       
       // Show specific validation errors if available
       if (error.response?.data?.error === 'DUPLICATE_EMAIL' || error.response?.data?.error === 'DUPLICATE_TEAM_EMAIL') {
@@ -361,15 +347,20 @@ const AdminDashboard = () => {
       } else if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to add team member. Please check all required fields.');
+        toast.error(
+          error.response?.data?.message ||
+          error.message ||
+          'Could not add the team member. Please try again.'
+        );
       }
     }
   };
 
   const handleAddRentalProperty = async (e) => {
     e.preventDefault();
+    setIsAddingRental(true);
+
     try {
-      // Extract form data
       const formData = new FormData(e.target);
       
       // Add fixed fields for rental properties
@@ -381,18 +372,25 @@ const AdminDashboard = () => {
       const requiredFields = ['title', 'type', 'rent', 'area', 'address', 'city', 'state', 'pincode', 'description'];
       const missingFields = [];
       
-      console.log('=== FRONTEND VALIDATION ===');
       for (const field of requiredFields) {
         const value = formData.get(field);
-        console.log(`${field}:`, value);
         if (!value || value.toString().trim() === '') {
           missingFields.push(field);
         }
       }
       
       if (missingFields.length > 0) {
-        console.log('Missing fields:', missingFields);
         toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        return;
+      }
+
+      const images = formData.getAll('images').filter(file => file instanceof File && file.size > 0);
+      if (images.length > 10) {
+        toast.error('Upload no more than 10 property images.');
+        return;
+      }
+      if (images.some(file => file.size > 10 * 1024 * 1024)) {
+        toast.error('Each property image must be 10 MB or smaller.');
         return;
       }
       
@@ -411,37 +409,48 @@ const AdminDashboard = () => {
       if (!formData.get('furnished') || formData.get('furnished') === '') formData.set('furnished', 'unfurnished');
       if (!formData.get('deposit') || formData.get('deposit') === '') formData.set('deposit', '0');
       
-      console.log('Creating rental property with data:');
-      for (let [key, value] of formData.entries()) {
-        if (value instanceof File) {
-          console.log(key, `File: ${value.name} (${value.size} bytes)`);
-        } else {
-          console.log(key, value);
-        }
-      }
-      
       const response = await adminService.createRentalProperty(formData);
-      console.log('Rental property creation response:', response);
+      const property = response?.data?.property;
+      if (!property) {
+        throw new Error("The server did not return the created rental property.");
+      }
       toast.success('Rental property added successfully');
       
       // Update the rental properties list
-      setRentalProperties(prev => [...prev, response.data.property]);
+      setRentalProperties(prev => [
+        property,
+        ...prev.filter(item => item._id !== property._id)
+      ]);
+      setAllProperties(prev => [
+        property,
+        ...prev.filter(item => item._id !== property._id)
+      ]);
+      setStats(prev => ({
+        ...prev,
+        totalProperties: (prev.totalProperties || 0) + 1,
+        approvedProperties: (prev.approvedProperties || 0) + 1
+      }));
       
       // Reset form and close modal
       e.target.reset();
       setShowAddRentalModal(false);
     } catch (error) {
-      console.error('Error adding rental property:', error);
-      
-      // Show specific validation errors if available
+      console.error('Error adding rental property:', error.response?.status || error.message);
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
-        const errorMessages = error.response.data.errors.map(err => err.msg).join(', ');
+        const errorMessages = error.response.data.errors
+          .map(err => err.msg || err.message)
+          .filter(Boolean)
+          .join(', ');
         toast.error(`Validation failed: ${errorMessages}`);
-      } else if (error.response?.data?.message) {
-        toast.error(error.response.data.message);
       } else {
-        toast.error('Failed to add rental property. Please check all required fields.');
+        toast.error(
+          error.response?.data?.message ||
+          error.message ||
+          'Could not create the rental property. Please try again.'
+        );
       }
+    } finally {
+      setIsAddingRental(false);
     }
   };
 
@@ -859,18 +868,12 @@ const AdminDashboard = () => {
                           <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
                             {member.profileImage ? (
                               <img
-                                src={(() => {
-                                  const imagePath = member.profileImage.startsWith('/uploads') 
-                                    ? member.profileImage 
-                                    : `/uploads/team/${member.profileImage}`;
-                                  return `http://localhost:5000${imagePath}?v=${Date.now()}`;
-                                })()}
+                                src={getTeamMemberImageUrl(member.profileImage)}
                                 alt={member.name}
                                 className="w-16 h-16 rounded-full object-cover"
                                 onError={(e) => {
-                                  console.error(`Failed to load admin panel image for ${member.name}`);
-                                  e.target.style.display = 'none';
-                                  e.target.nextSibling.style.display = 'flex';
+                                  e.currentTarget.onerror = null;
+                                  e.currentTarget.src = '/image/muz1.jpg';
                                 }}
                               />
                             ) : (
@@ -1034,7 +1037,7 @@ const AdminDashboard = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image</label>
                       <input
                         type="file"
-                        accept="image/*"
+                        accept=".jpg,.jpeg,.png,.gif,.webp"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                         name="profileImage"
                       />
@@ -1389,7 +1392,9 @@ const AdminDashboard = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">Add New Rental Property</h3>
                       <button
+                        type="button"
                         onClick={() => setShowAddRentalModal(false)}
+                        disabled={isAddingRental}
                         className="text-gray-400 hover:text-gray-600 text-xl"
                       >
                         ✕
@@ -1581,27 +1586,29 @@ const AdminDashboard = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-1">Property Images</label>
                         <input
                           type="file"
-                          accept="image/*"
+                          accept=".jpg,.jpeg,.png,.gif,.webp"
                           multiple
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-500 focus:border-primary-500"
                           name="images"
                         />
-                        <p className="text-xs text-gray-500 mt-1">Upload multiple images of the property</p>
+                        <p className="text-xs text-gray-500 mt-1">Up to 10 images, 10 MB each (JPEG, PNG, GIF, or WebP).</p>
                       </div>
 
                       <div className="flex items-center justify-end space-x-4 pt-4">
                         <button
                           type="button"
                           onClick={() => setShowAddRentalModal(false)}
+                          disabled={isAddingRental}
                           className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           Cancel
                         </button>
                         <button
                           type="submit"
-                          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                          disabled={isAddingRental}
+                          className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                          Add Rental Property
+                          {isAddingRental ? 'Uploading...' : 'Add Rental Property'}
                         </button>
                       </div>
                     </form>

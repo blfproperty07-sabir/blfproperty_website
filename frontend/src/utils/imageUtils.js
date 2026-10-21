@@ -11,8 +11,32 @@ export const getTeamMemberImageUrl = (profileImagePath, addCacheBuster = false) 
     return "/image/muz1.jpg";
   }
   
-  // Very simple - just add backend URL to the path
-  return `http://localhost:5000${profileImagePath}`;
+  // Handle different types of image paths
+  if (/^https?:\/\//i.test(profileImagePath)) {
+    // Already a full URL
+    return profileImagePath;
+  }
+  
+  if (profileImagePath.startsWith('/uploads/')) {
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+    const backendOrigin = apiUrl.replace(/\/api\/?$/, '');
+    const imageUrl = `${backendOrigin}${profileImagePath}`;
+    
+    // Add cache buster to force refresh if needed
+    if (addCacheBuster) {
+      return `${imageUrl}?t=${Date.now()}`;
+    }
+    
+    return imageUrl;
+  }
+  
+  if (profileImagePath.startsWith('/image/')) {
+    // Local public folder image
+    return profileImagePath;
+  }
+  
+  // Fallback to local image
+  return "/image/muz1.jpg";
 };
 
 /**
@@ -20,8 +44,32 @@ export const getTeamMemberImageUrl = (profileImagePath, addCacheBuster = false) 
  * @param {Event} event - The error event from the img element
  */
 export const handleImageError = (event) => {
-  console.error('Image failed to load:', event.target.src);
-  event.target.src = "/image/muz1.jpg";
+  console.error('❌ Team member image failed to load:', event.target.src);
+  
+  // Try different fallback images in sequence
+  const fallbackImages = [
+    '/image/muz1.jpg',
+    '/image/muz2.jpg',
+    '/image/muz3.jpg',
+    '/image/blf_logo.png'
+  ];
+  
+  // Get current fallback attempt or start with first
+  const currentSrc = event.target.src;
+  let nextFallbackIndex = 0;
+  
+  fallbackImages.forEach((fallback, index) => {
+    if (currentSrc.includes(fallback.replace('/image/', ''))) {
+      nextFallbackIndex = (index + 1) % fallbackImages.length;
+    }
+  });
+  
+  event.target.src = fallbackImages[nextFallbackIndex];
+  
+  // Prevent infinite error loop
+  if (nextFallbackIndex === 0 && currentSrc.includes('muz1.jpg')) {
+    event.target.onerror = null;
+  }
 };
 
 /**

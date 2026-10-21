@@ -1,259 +1,236 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Eye, EyeOff } from 'lucide-react';
 import authService from '../services/authService';
+import { useAuth } from '../context/AuthContext';
+import AuthPageLayout from '../components/auth/AuthPageLayout';
+import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { loginWithGoogle } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
     phone: '',
-    role: 'buyer'
+    role: 'buyer',
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  // Test API connectivity when component mounts
-  useEffect(() => {
-    const testConnectivity = async () => {
-      try {
-        console.log('Testing API connectivity...');
-        const response = await fetch('http://localhost:5000/api/health');
-        const data = await response.json();
-        console.log('API connectivity test successful:', data);
-      } catch (error) {
-        console.error('API connectivity test failed:', error);
-      }
-    };
-    
-    testConnectivity();
-  }, []);
-
-  // Test function for debugging
-  const testRegistration = async () => {
-    try {
-      console.log('Running test registration...');
-      const testData = {
-        name: 'Test User',
-        email: 'test' + Date.now() + '@example.com',
-        password: 'testpass123',
-        phone: '9876543210',
-        role: 'buyer'
-      };
-      
-      console.log('Test data:', testData);
-      const response = await authService.register(testData);
-      console.log('Test registration successful:', response);
-      toast.success('Test registration successful!');
-    } catch (error) {
-      console.error('Test registration failed:', error);
-      toast.error('Test registration failed: ' + (error.response?.data?.message || error.message));
-    }
+  const handleChange = (event) => {
+    setFormData((current) => ({ ...current, [event.target.name]: event.target.value }));
   };
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('Passwords do not match.');
       return;
     }
-
     if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error('Password must be at least 6 characters.');
       return;
     }
-
-    // Validate phone number if provided
     if (formData.phone && !/^[0-9]{10}$/.test(formData.phone)) {
-      toast.error('Phone number must be exactly 10 digits');
+      toast.error('Enter a valid 10-digit phone number.');
       return;
     }
 
     setLoading(true);
-
+    const { confirmPassword, ...userData } = formData;
     try {
-      const { confirmPassword, ...submitData } = formData;
-      console.log('Frontend: Submitting registration data:', submitData);
-      console.log('Frontend: API URL:', process.env.REACT_APP_API_URL);
-      
-      const response = await authService.register(submitData);
-      console.log('Frontend: Registration successful:', response);
-      
-      toast.success('Registration successful! Please login.');
-      navigate('/login');
+      await authService.register({
+        ...userData,
+        name: userData.name.trim(),
+        email: userData.email.trim(),
+        phone: userData.phone.trim() || undefined,
+      });
+      toast.success('Your account is ready. Please sign in.');
+      navigate('/login', { replace: true });
     } catch (error) {
-      console.error('Frontend: Registration error:', error);
-      console.error('Frontend: Error response:', error.response);
-      console.error('Frontend: Error data:', error.response?.data);
-      toast.error(error.response?.data?.message || 'Registration failed');
+      toast.error(error.response?.data?.message || 'Could not create your account. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleGoogleSuccess = async (credential) => {
+    setLoading(true);
+    const result = await loginWithGoogle(credential);
+    setLoading(false);
+
+    if (result.success) {
+      toast.success('Your account is ready.');
+      navigate(result.user.role === 'admin' ? '/admin/dashboard' : '/', { replace: true });
+    } else {
+      toast.error(result.error || 'Google sign-up failed. Please try again.');
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-auto flex items-center justify-center">
-            <span className="text-2xl font-bold text-primary-500">Eazy Property</span>
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Register
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Create your account to access exclusive properties
-          </p>
+    <AuthPageLayout
+      mode="register"
+      title="Create your account"
+      subtitle="Join BLF Property to discover homes and connect with owners."
+    >
+      <div className="space-y-5">
+        <GoogleSignInButton
+          onSuccess={handleGoogleSuccess}
+          onError={(message) => toast.error(message)}
+          disabled={loading}
+        />
+
+        <div className="flex items-center gap-4" aria-hidden="true">
+          <span className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs font-medium uppercase tracking-wider text-slate-400">or sign up with email</span>
+          <span className="h-px flex-1 bg-slate-200" />
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Full Name
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-              />
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label htmlFor="name" className="mb-2 block text-sm font-semibold text-slate-700">Full name</label>
+              <div>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  minLength={2}
+                  maxLength={50}
+                  required
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="Your full name"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">Email address</label>
+              <div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email Address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={handleChange}
-              />
+              <label htmlFor="phone" className="mb-2 block text-sm font-semibold text-slate-700">Phone <span className="font-normal text-slate-400">(optional)</span></label>
+              <div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="10-digit number"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
+                />
+              </div>
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                Phone Number
-              </label>
-              <input
-                id="phone"
-                name="phone"
-                type="tel"
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Phone number (optional)"
-                value={formData.phone}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                I am a
-              </label>
+              <label htmlFor="role" className="mb-2 block text-sm font-semibold text-slate-700">I want to</label>
               <select
                 id="role"
                 name="role"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm"
                 value={formData.role}
                 onChange={handleChange}
+                className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
               >
-                <option value="buyer">Property Buyer</option>
-                <option value="seller">Property Seller</option>
+                <option value="buyer">Find a property</option>
+                <option value="seller">List my property</option>
               </select>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Password (min 6 characters)"
-                value={formData.password}
-                onChange={handleChange}
-              />
+              <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700">Password</label>
+              <div className="relative">
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="At least 6 characters"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 pr-10 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                placeholder="Confirm password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
+              <label htmlFor="confirmPassword" className="mb-2 block text-sm font-semibold text-slate-700">Confirm password</label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  minLength={6}
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Type it again"
+                  className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3 pr-10 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-900 focus:ring-2 focus:ring-blue-950/10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword((visible) => !visible)}
+                  aria-label={showConfirmPassword ? 'Hide confirmation password' : 'Show confirmation password'}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-400 hover:text-slate-700"
+                >
+                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (
-                <div className="flex items-center">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Creating account...
-                </div>
-              ) : (
-                'Create account'
-              )}
-            </button>
-          </div>
-
-          <div className="text-center">
-            <span className="text-sm text-gray-600">
-              Already have an account?{' '}
-              <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
-                Sign in
-              </Link>
-            </span>
-          </div>
-          
-          {/* Debug Test Button */}
-          <div className="text-center">
-            <button
-              type="button"
-              onClick={testRegistration}
-              className="w-full py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-            >
-              🐛 Test Registration (Debug)
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex h-11 w-full items-center justify-center rounded-lg bg-[#101b3d] px-4 text-sm font-semibold text-white transition hover:bg-blue-950 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {loading ? 'Creating your account...' : 'Create account'}
+          </button>
         </form>
+
+        <p className="text-center text-sm text-slate-500">
+          Already have an account?{' '}
+          <Link to="/login" className="font-bold text-rose-700 no-underline hover:text-rose-800">Sign in</Link>
+        </p>
       </div>
-    </div>
+    </AuthPageLayout>
   );
 };
 

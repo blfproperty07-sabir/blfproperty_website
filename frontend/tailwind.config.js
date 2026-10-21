@@ -6,7 +6,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Colors derived from Eazy Property Solution logo - Yellow/Orange theme
+        // Colors derived from the BLF Property brand - Yellow/Orange theme
         primary: {
           50: '#fffbeb',
           100: '#fef3c7',

@@ -108,7 +108,7 @@ const Contact = () => {
               <div>
                 <h2 className="text-3xl font-bold text-gray-800 mb-6">Get in Touch</h2>
                 <p className="text-gray-600 mb-8">
-                  Ready to find your dream property or need expert advice? Contact Eazy Property Solution & Construction today.
+                  Ready to find your dream property or need expert advice? Contact BLF Property today.
                 </p>
               </div>
 
@@ -124,9 +124,9 @@ const Contact = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Office Address</h3>
                     <p className="text-gray-600">
-                      Eazy Property Solution & Construction<br />
-                       Bhagwanpur behind hotel kailash tower <br />
-                      Muzaffarpur Bihar 842001
+                      BLF Property<br />
+                      Bhagwanpur behind hotel kailash tower <br />
+                      Muzaffarpur Bihar 842001
                     </p>
                   </div>
                 </div>
@@ -157,8 +157,8 @@ const Contact = () => {
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800 mb-1">Email Address</h3>
                     <p className="text-gray-600">
-                      <a href="mailto:easypropertysolution123@gmail.com" className="hover:text-primary-600 transition-colors">
-                        easypropertysolution123@gmail.com
+                      <a href="mailto:blfproperty@gmail.com" className="hover:text-primary-600 transition-colors">
+                        blfproperty@gmail.com
                       </a>
                     </p>
                     <p className="text-sm text-gray-500">We'll respond within 24 hours</p>
@@ -182,18 +182,18 @@ const Contact = () => {
                 </div>
               </div>
 
-              {/* Boss Contact Card */}
+              {/* Brand Contact Card */}
               <div className="bg-primary-50 p-6 rounded-lg border border-primary-200">
                 <div className="flex items-center space-x-4">
-                  <img 
-                    src="/image/companyboss1.jpg"
-                    alt="Sanni Kumar Gupta"
-                    className="w-16 h-16 rounded-full object-cover border-2 border-primary-300"
+                  <img
+                    src="/image/blf_logo.png"
+                    alt="BLF Property Logo"
+                    className="w-16 h-16 rounded-full object-cover border-2 border-primary-300 bg-white p-1"
                   />
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">Inzamam Asad</h3>
-                    <p className="text-primary-600 font-medium">CEO & Founder</p>
-                    <p className="text-sm text-gray-600">Direct contact for premium clients</p>
+                    <h3 className="text-lg font-semibold text-gray-800">BLF Property</h3>
+                    <p className="text-primary-600 font-medium">Trusted property partner</p>
+                    <p className="text-sm text-gray-600">Direct support for premium property inquiries</p>
                   </div>
                 </div>
               </div>

@@ -177,7 +177,19 @@ const SubmitProperty = () => {
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 10) {
-      toast.error('Maximum 10 images allowed');
+      toast.error('Upload no more than 10 property images.');
+      return;
+    }
+    const invalidType = files.find(file =>
+      !['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)
+    );
+    if (invalidType) {
+      toast.error(`${invalidType.name} must be a JPEG, PNG, GIF, or WebP image.`);
+      return;
+    }
+    const oversizedFile = files.find(file => file.size > 10 * 1024 * 1024);
+    if (oversizedFile) {
+      toast.error(`${oversizedFile.name} is too large. Maximum size is 10 MB.`);
       return;
     }
     setImages(files);
@@ -343,14 +355,18 @@ const SubmitProperty = () => {
       setStep(1);
       
     } catch (error) {
-      console.error('Submit property error:', error);
+      console.error('Submit property error:', error.response?.status || error.message);
       
       // Show specific error messages
       if (error.response?.data?.errors && Array.isArray(error.response.data.errors)) {
         const errorMessages = error.response.data.errors.map(err => err.message || err.msg).join(', ');
         toast.error(`Validation errors: ${errorMessages}`);
       } else {
-        toast.error(error.response?.data?.message || 'Failed to submit property. Please check all fields and try again.');
+        toast.error(
+          error.response?.data?.message ||
+          error.message ||
+          'Could not submit the property. Please try again.'
+        );
       }
     } finally {
       setLoading(false);
@@ -684,7 +700,7 @@ const SubmitProperty = () => {
               <input
                 type="file"
                 multiple
-                accept="image/*"
+                accept=".jpg,.jpeg,.png,.gif,.webp"
                 onChange={handleImageChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                 required

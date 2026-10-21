@@ -23,37 +23,40 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Company Info */}
           <div className="space-y-6">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Eazy Property Solution</h3>
-              <p className="text-gray-400 text-sm">& Construction</p>
+            <div className="flex items-center gap-3">
+              <img src="/image/blf_logo.png" alt="BLF Property Logo" className="w-12 h-12 rounded-full object-cover bg-white p-1" />
+              <div>
+                <h3 className="text-xl font-bold mb-1">BLF Property</h3>
+                <p className="text-gray-400 text-sm">Property Solutions</p>
+              </div>
             </div>
             <p className="text-gray-300 leading-relaxed">
               Your trusted partner in real estate. We help you buy, sell, and rent properties 
               with ease and confidence. Building dreams, one property at a time.
             </p>
             <div className="flex space-x-4">
-              <button 
+              <button variant="ghost" type="button"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="Facebook"
                 onClick={() => window.open('https://www.facebook.com/share/1A6tWYeXsE', '_blank')}
               >
                 <FiFacebook className="w-5 h-5" />
               </button>
-              <button 
+              <button variant="ghost" type="button"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="You Tube"
-                onClick={() => window.open('https://youtube.com/@eazypropertysolution?si=bDK3jOoi9iDX1t7B', '_blank')}
+                onClick={() => window.open('https://www.youtube.com', '_blank')}
               >
                 <FiTwitter className="w-5 h-5" />
               </button>
-              <button 
+              <button variant="ghost" type="button"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="Instagram"
                 onClick={() => window.open('https://www.instagram.com/bihar_property_solution?igsh=bnF0dW9iNDNvenV4', '_blank')}
               >
                 <FiInstagram className="w-5 h-5" />
               </button>
-              <button 
+              <button variant="ghost" type="button"
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="LinkedIn"
                 onClick={() => window.open('https://www.linkedin.com/in/sanni-kumar-gupta-10792b290?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app', '_blank')}
@@ -129,10 +132,10 @@ const Footer = () => {
               <div className="flex items-center space-x-3">
                 <FiMail className="w-5 h-5 text-primary-400 flex-shrink-0" />
                 <a 
-                  href="easypropertysolution123@gmail.com" 
+                  href="blfproperty@gmail.com" 
                   className="text-gray-300 hover:text-primary-400 transition-colors duration-200"
                 >
-                  easypropertysolution123@gmail.com
+                  blfproperty@gmail.com
                 </a>
               </div>
             </div>
@@ -145,7 +148,7 @@ const Footer = () => {
         <div className="container-custom py-6">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-gray-400 text-sm text-center md:text-left">
-              © {new Date().getFullYear()} Eazy Property Solution & Construction. All rights reserved.
+              © {new Date().getFullYear()} BLF Property. All rights reserved.
              
             </div>
             
@@ -162,7 +165,7 @@ const Footer = () => {
               >
                 Terms of Service
               </Link>
-              <button
+              <button variant="ghost" type="button"
                 onClick={scrollToTop}
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-primary-600 transition-colors duration-200"
                 aria-label="Scroll to top"

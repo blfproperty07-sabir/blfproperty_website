@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 const AdminLogin = () => {
-  const { user, login } = useAuth();
+  const { user, login, logout } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: '',
@@ -47,15 +47,11 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      // Clear any previous errors
-      console.log('Attempting admin login with:', { email: formData.email });
-      
       const result = await login(formData.email, formData.password);
-      
-      console.log('Login result:', result);
       
       if (result.success) {
         if (result.user.role !== 'admin') {
+          logout();
           toast.error('Access denied. Admin credentials required.');
           return;
         }
@@ -68,7 +64,6 @@ const AdminLogin = () => {
         toast.error(result.error || 'Login failed. Please check your credentials.');
       }
     } catch (error) {
-      console.error('Admin login error:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Login failed. Please check your credentials.';
       toast.error(errorMessage);
     } finally {

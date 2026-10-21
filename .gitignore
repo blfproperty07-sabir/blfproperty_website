@@ -10,6 +10,8 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+backend/.env.backup-*
+frontend/.env.backup-*
 
 # Build outputs
 build/
@@ -133,4 +135,19 @@ backend/uploads/*
 
 # Package lock files (optional - you can choose to include or exclude)
 # package-lock.json
-# yarn.lock
+# yarn.lock.env.*
+!.env.example
+**/node_modules/
+**/build/
+**/dist/
+**/coverage/
+*.bak
+
+# Local backups and debug exports
+**/*backup*/
+**/*.backup*
+**/*-backup-*
+**/*.bak
+admin-dashboard-debug.txt
+project-files.txt
+project-source.txt

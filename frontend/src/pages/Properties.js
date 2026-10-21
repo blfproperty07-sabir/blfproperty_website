@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import propertyService from '../services/propertyService';
-import { formatCurrency, formatDate } from '../utils/formatters';
+import { getPropertyTypeLabel } from '../utils/formatters';
+import PropertyCard from '../components/property/PropertyCard';
 
 const Properties = () => {
   const [properties, setProperties] = useState([]);
@@ -15,6 +16,18 @@ const Properties = () => {
     bedrooms: '',
     location: ''
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setFilters({
+      search: params.get('search') || '',
+      type: params.get('type') || '',
+      minPrice: params.get('minPrice') || '',
+      maxPrice: params.get('maxPrice') || '',
+      bedrooms: params.get('bedrooms') || '',
+      location: params.get('location') || ''
+    });
+  }, [location.search]);
 
   const fetchProperties = useCallback(async () => {
     try {
@@ -74,7 +87,7 @@ const Properties = () => {
     );
   });
 
-  const propertyTypes = ['apartment', 'villa', 'house', 'office', 'commercial'];
+  const propertyTypes = ['apartment', 'villa', 'house', 'plot', 'commercial', 'office', 'shop', 'warehouse'];
   const bedroomOptions = [1, 2, 3, 4, 5];
 
   // Get the listing type from URL to determine page title
@@ -106,8 +119,7 @@ const Properties = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
-              <input
-                type="text"
+              <input type="text"
                 name="search"
                 placeholder="Search properties..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -125,9 +137,7 @@ const Properties = () => {
               >
                 <option value="">All Types</option>
                 {propertyTypes.map(type => (
-                  <option key={type} value={type}>
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </option>
+                  <option key={type} value={type}>{getPropertyTypeLabel(type)}</option>
                 ))}
               </select>
             </div>
@@ -201,64 +211,7 @@ const Properties = () => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredProperties.map((property) => (
-                <div key={property._id} className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow">
-                  <div className="relative">
-                    <img 
-                      src={property.images?.[0]?.url || property.images?.[0] || '/image/2bhk-modern-apartment.jpg'}
-                      alt={property.title}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="absolute top-2 left-2 bg-primary-500 text-white px-2 py-1 rounded text-sm font-semibold">
-                      {property.type.charAt(0).toUpperCase() + property.type.slice(1)}
-                    </div>
-                    <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded text-sm font-semibold">
-                      Available
-                    </div>
-                  </div>
-                  
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-800 mb-2 line-clamp-1">{property.title}</h3>
-                    <p className="text-gray-600 mb-3 line-clamp-2">{property.description}</p>
-                    
-                    <div className="flex items-center text-gray-500 mb-3">
-                      <i className="fas fa-map-marker-alt mr-2"></i>
-                      <span className="line-clamp-1">{property.location?.city}, {property.location?.state}</span>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-2 mb-4 text-sm text-gray-600">
-                      <div className="flex items-center">
-                        <i className="fas fa-bed mr-1"></i>
-                        <span>{property.features?.bedrooms || 0} Bed</span>
-                      </div>
-                      <div className="flex items-center">
-                        <i className="fas fa-bath mr-1"></i>
-                        <span>{property.features?.bathrooms || 0} Bath</span>
-                      </div>
-                      <div className="flex items-center">
-                        <i className="fas fa-ruler-combined mr-1"></i>
-                        <span>{property.area?.size || 0} {property.area?.unit || 'sqft'}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-2xl font-bold text-primary-600">
-                          {formatCurrency(property.price?.amount || property.price)}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Listed {formatDate(property.createdAt)}
-                        </p>
-                      </div>
-                      
-                      <Link 
-                        to={`/properties/${property._id}`}
-                        className="bg-primary-500 text-white px-4 py-2 rounded hover:bg-primary-600 transition-colors"
-                      >
-                        View Details
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <PropertyCard key={property._id} property={property} />
               ))}
             </div>
           </>

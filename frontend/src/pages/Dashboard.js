@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import SubmitProperty from '../components/SubmitProperty';
 import propertyService from '../services/propertyService';
 import { formatCurrency, formatDate } from '../utils/formatters';
+import PropertyImage from '../components/property/PropertyImage';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -227,8 +228,8 @@ const Dashboard = () => {
                   <div key={property._id} className="bg-white rounded-lg shadow overflow-hidden">
                     <div className="md:flex">
                       <div className="md:w-48 h-48">
-                        <img
-                          src={property.images?.[0]?.url || property.images?.[0] || '/image/2bhk-modern-apartment.jpg'}
+                        <PropertyImage
+                          image={property.images?.[0]}
                           alt={property.title}
                           className="w-full h-full object-cover"
                         />

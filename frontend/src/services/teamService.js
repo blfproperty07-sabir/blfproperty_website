@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
 
 // Create axios instance for team operations
 const teamAPI = axios.create({
@@ -90,25 +90,6 @@ const teamService = {
   // Toggle team member status (admin only)
   toggleStatus: async (id) => {
     const response = await teamAPI.patch(`/${id}/toggle-status`);
-    return response.data;
-  },
-
-  // Upload team member image
-  uploadImage: async (id, imageFile) => {
-    const formData = new FormData();
-    formData.append('image', imageFile);
-
-    const response = await teamAPI.post(`/${id}/image`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    return response.data;
-  },
-
-  // Delete team member image
-  deleteImage: async (id) => {
-    const response = await teamAPI.delete(`/${id}/image`);
     return response.data;
   },
 

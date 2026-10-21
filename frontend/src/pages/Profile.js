@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
@@ -15,6 +15,7 @@ const Profile = () => {
     newPassword: '',
     confirmPassword: ''
   });
+  const isGoogleAccount = Boolean(user?.googleId);
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
@@ -62,40 +63,49 @@ const Profile = () => {
     }
   };
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-    
+  const handlePasswordSubmit = async (event) => {
+    event.preventDefault();
+
     if (passwords.newPassword !== passwords.confirmPassword) {
-      toast.error('New passwords do not match');
+      toast.error("New password and confirmation do not match.");
       return;
     }
 
     if (passwords.newPassword.length < 6) {
-      toast.error('New password must be at least 6 characters long');
+      toast.error("Password must contain at least 6 characters.");
       return;
+    }
+
+    const payload = {
+      newPassword: passwords.newPassword,
+      confirmPassword: passwords.confirmPassword
+    };
+
+    if (localStorage.getItem('loginMethod') !== 'google' && user?.hasPassword) {
+      if (!passwords.currentPassword) {
+        toast.error("Please enter your current password.");
+        return;
+      }
+      payload.currentPassword = passwords.currentPassword;
     }
 
     setPasswordLoading(true);
 
     try {
-      const result = await changePassword({
-        currentPassword: passwords.currentPassword,
-        newPassword: passwords.newPassword
-      });
-      
+      const result = await changePassword(payload);
+
       if (result.success) {
+        toast.success("Password updated successfully.");
         setPasswords({
-          currentPassword: '',
-          newPassword: '',
-          confirmPassword: ''
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: ""
         });
-        toast.success('Password changed successfully!');
       } else {
-        toast.error(result.error || 'Failed to change password');
+        toast.error(result.error || "Password update failed.");
       }
     } catch (error) {
-      console.error('Password change error:', error);
-      toast.error('Failed to change password');
+      toast.error("Password update failed. Please try again.");
     } finally {
       setPasswordLoading(false);
     }
@@ -178,14 +188,26 @@ const Profile = () => {
                   <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                     Account Type
                   </label>
-                  <input
-                    type="text"
-                    id="role"
-                    value={formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
-                    disabled
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Account type cannot be changed</p>
+                  {['buyer', 'seller'].includes(user.role) ? (
+                    <select
+                      id="role"
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value="buyer">Buyer</option>
+                      <option value="seller">Seller</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      id="role"
+                      value={formData.role.charAt(0).toUpperCase() + formData.role.slice(1)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-gray-500"
+                      disabled
+                    />
+                  )}
                 </div>
 
                 <div className="pt-4">
@@ -209,23 +231,25 @@ const Profile = () => {
 
             {/* Change Password */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Change Password</h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-6">{localStorage.getItem('loginMethod') === 'google' ? 'Set Password' : 'Change Password'}</h2>
               
               <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
-                  </label>
-                  <input
-                    type="password"
-                    id="currentPassword"
-                    name="currentPassword"
-                    value={passwords.currentPassword}
-                    onChange={handlePasswordChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                    required
-                  />
-                </div>
+                {localStorage.getItem('loginMethod') !== 'google' && user?.hasPassword && (
+                  <div>
+                    <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                      Current Password
+                    </label>
+                    <input
+                      type="password"
+                      id="currentPassword"
+                      name="currentPassword"
+                      value={passwords.currentPassword}
+                      onChange={handlePasswordChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
+                )}
 
                 <div>
                   <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 mb-1">
@@ -272,7 +296,7 @@ const Profile = () => {
                         Changing...
                       </div>
                     ) : (
-                      'Change Password'
+                      localStorage.getItem('loginMethod') === 'google' ? 'Set Password' : 'Change Password'
                     )}
                   </button>
                 </div>
@@ -302,3 +326,9 @@ const Profile = () => {
 };
 
 export default Profile;
+
+
+
+
+
+

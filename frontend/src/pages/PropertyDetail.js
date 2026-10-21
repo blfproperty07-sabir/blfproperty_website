@@ -1,24 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '../context/AuthContext';
 import propertyService from '../services/propertyService';
 import { formatCurrency, formatArea } from '../utils/formatters';
+import PropertyImage from '../components/property/PropertyImage';
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   const [property, setProperty] = useState(null);
   const [similarProperties, setSimilarProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [interestSubmitting, setInterestSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  useEffect(() => {
-    if (id) {
-      fetchPropertyDetails();
-    }
-  }, [id]);
-
-  const fetchPropertyDetails = async () => {
+  const fetchPropertyDetails = useCallback(async () => {
     try {
       setLoading(true);
       const response = await propertyService.getPropertyById(id);
@@ -31,7 +30,13 @@ const PropertyDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetchPropertyDetails();
+    }
+  }, [id, fetchPropertyDetails]);
 
   const handleImageNavigation = (direction) => {
     if (!property?.images || property.images.length <= 1) return;
@@ -57,6 +62,23 @@ const PropertyDetail = () => {
   const formatFurnishing = (furnished) => {
     if (!furnished) return 'Not specified';
     return furnished.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const handleExpressInterest = async () => {
+    if (!isAuthenticated) {
+      navigate('/register');
+      return;
+    }
+
+    setInterestSubmitting(true);
+    try {
+      const response = await propertyService.expressInterest(id);
+      toast.success(response.message || 'Interest expressed successfully.');
+    } catch (interestError) {
+      toast.error(interestError.response?.data?.message || 'Failed to express interest.');
+    } finally {
+      setInterestSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -112,13 +134,12 @@ const PropertyDetail = () => {
             {/* Image Gallery */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
               <div className="relative h-96">
-                <img
-                  src={property.images?.[currentImageIndex]?.url || property.images?.[0]?.url || '/image/muz1.jpg'}
+                <PropertyImage
+                  image={property.images?.[currentImageIndex] || property.images?.[0]}
                   alt={property.title}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.src = '/image/muz1.jpg';
-                  }}
+                  fallback="/image/muz1.jpg"
+                  loading="eager"
                 />
                 
                 {/* Image Navigation */}
@@ -176,13 +197,11 @@ const PropertyDetail = () => {
                           currentImageIndex === index ? 'border-primary-600' : 'border-gray-200'
                         }`}
                       >
-                        <img
-                          src={image.url}
+                        <PropertyImage
+                          image={image}
                           alt={`View ${index + 1}`}
                           className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.target.src = '/image/muz1.jpg';
-                          }}
+                          fallback="/image/muz1.jpg"
                         />
                       </button>
                     ))}
@@ -332,6 +351,15 @@ const PropertyDetail = () => {
 
               {/* Contact Actions */}
               <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleExpressInterest}
+                  disabled={interestSubmitting}
+                  className="w-full bg-primary-600 hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-60 text-white font-semibold py-3 px-4 rounded-lg"
+                >
+                  {interestSubmitting ? 'Submitting...' : 'Apply / Express Interest'}
+                </button>
+
                 <button 
                   onClick={() => navigate('/contact')}
                   className="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center"
@@ -372,6 +400,28 @@ const PropertyDetail = () => {
             </div>
           </div>
         </div>
+
+        {similarProperties.length > 0 && (
+          <div className="mt-12">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">Similar Properties</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+              {similarProperties.slice(0, 4).map((item) => (
+                <div key={item._id} className="bg-white rounded-xl shadow-md overflow-hidden">
+                  <PropertyImage
+                    image={item.images?.[0]}
+                    alt={item.title}
+                    className="h-48 w-full object-cover"
+                    fallback="/image/muz1.jpg"
+                  />
+                  <div className="p-4">
+                    <h4 className="font-semibold text-gray-900 mb-2">{item.title}</h4>
+                    <p className="text-primary-600 font-bold">{formatCurrency(item.price?.amount || item.price)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

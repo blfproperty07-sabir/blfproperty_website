@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -18,7 +18,6 @@ import Properties from './pages/Properties';
 import PropertyDetail from './pages/PropertyDetail';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import Insights from './pages/Insights';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -42,21 +41,30 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+const SiteFrame = ({ children }) => {
+  const { pathname } = useLocation();
+  const isAuthPage = ['/login', '/register', '/admin/login'].includes(pathname);
+
   return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {!isAuthPage && <Navbar />}
+      <main className="flex-grow">{children}</main>
+      {!isAuthPage && <Footer />}
+    </div>
+  );
+};
+
+function App() {
+  const appContent = (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <PropertyProvider>
           <Router>
-            <div className="min-h-screen bg-gray-50 flex flex-col">
-              <Navbar />
-              
-              <main className="flex-grow">
+            <SiteFrame>
                 <Routes>
-                  {/* Public Routes - Home, About, and Insights are accessible without login */}
+                  {/* Public Routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/about" element={<About />} />
-                  <Route path="/insights" element={<Insights />} />
                   
                   {/* Auth Routes (only accessible when not logged in) */}
                   <Route path="/login" element={
@@ -75,22 +83,10 @@ function App() {
                     </PublicRoute>
                   } />
                   
-                  {/* Protected Routes (require authentication) - All pages except Home, About, and Insights */}
-                  <Route path="/properties" element={
-                    <ProtectedRoute>
-                      <Properties />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/properties/:id" element={
-                    <ProtectedRoute>
-                      <PropertyDetail />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="/contact" element={
-                    <ProtectedRoute>
-                      <Contact />
-                    </ProtectedRoute>
-                  } />
+                  {/* Public property browsing and contact routes */}
+                  <Route path="/properties" element={<Properties />} />
+                  <Route path="/properties/:id" element={<PropertyDetail />} />
+                  <Route path="/contact" element={<Contact />} />
                   
                   {/* User specific protected routes */}
                   <Route path="/profile" element={
@@ -136,10 +132,7 @@ function App() {
                     </div>
                   } />
                 </Routes>
-              </main>
-              
-              <Footer />
-            </div>
+            </SiteFrame>
             
             {/* Toast Notifications */}
             <ToastContainer
@@ -160,6 +153,8 @@ function App() {
       </AuthProvider>
     </QueryClientProvider>
   );
+
+  return appContent;
 }
 
 export default App;

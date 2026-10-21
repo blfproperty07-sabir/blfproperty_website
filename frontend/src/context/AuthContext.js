@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+﻿import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import authService from '../services/authService';
 
 // Auth Context
@@ -118,11 +118,13 @@ export const AuthProvider = ({ children }) => {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
       
       const response = await authService.login({ email, password });
-      const { user, token, refreshToken } = response.data.data;
+      const authPayload = response.data?.data || response.data;
+      const { user, token, refreshToken } = authPayload;
       
       // Store tokens
       localStorage.setItem('token', token);
       localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('loginMethod', 'password');
       
       // Set token in axios defaults
       authService.setAuthToken(token);
@@ -143,13 +145,43 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loginWithGoogle = async (credential) => {
+    try {
+      dispatch({ type: AUTH_ACTIONS.LOGIN_START });
+
+      const response = await authService.googleLogin(credential);
+      const authPayload = response.data?.data || response.data;
+      const { user, token, refreshToken } = authPayload;
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('refreshToken', refreshToken);
+      localStorage.setItem('loginMethod', 'google');
+      authService.setAuthToken(token);
+
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_SUCCESS,
+        payload: { user, token },
+      });
+
+      return { success: true, user };
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Google sign-in failed';
+      dispatch({
+        type: AUTH_ACTIONS.LOGIN_FAILURE,
+        payload: errorMessage,
+      });
+      return { success: false, error: errorMessage };
+    }
+  };
+
   // Register function
   const register = async (userData) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
       
       const response = await authService.register(userData);
-      const { user, token, refreshToken } = response.data.data;
+      const authPayload = response.data?.data || response.data;
+      const { user, token, refreshToken } = authPayload;
       
       // Store tokens
       localStorage.setItem('token', token);
@@ -178,6 +210,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
+    localStorage.removeItem('loginMethod');
     authService.setAuthToken(null);
     dispatch({ type: AUTH_ACTIONS.LOGOUT });
   };
@@ -200,14 +233,23 @@ export const AuthProvider = ({ children }) => {
   // Change password
   const changePassword = async (passwordData) => {
     try {
-      await authService.changePassword(passwordData);
+      const response = await authService.changePassword(passwordData);
+      const updatedUser = response.data?.data?.user || response.data?.user;
+
+      dispatch({
+        type: AUTH_ACTIONS.UPDATE_USER,
+        payload: updatedUser || {
+          ...state.user,
+          hasPassword: true
+        }
+      });
+
       return { success: true };
     } catch (error) {
-      const errorMessage = error.response?.data?.message || 'Password change failed';
+      const errorMessage = error.response?.data?.message || "Password update failed";
       return { success: false, error: errorMessage };
     }
   };
-
   // Clear error
   const clearError = () => {
     dispatch({ type: AUTH_ACTIONS.CLEAR_ERROR });
@@ -239,6 +281,7 @@ export const AuthProvider = ({ children }) => {
     
     // Actions
     login,
+    loginWithGoogle,
     register,
     logout,
     updateProfile,
@@ -269,3 +312,6 @@ export const useAuth = () => {
 };
 
 export default AuthContext;
+
+
+
