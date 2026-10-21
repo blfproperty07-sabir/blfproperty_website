@@ -87,7 +87,7 @@ const Navbar = () => {
           <a href="tel:+911234567890" className="mr-1 flex items-center gap-2 rounded-xl px-2 py-2 text-slate-700 no-underline transition hover:bg-slate-50">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600"><Phone size={17} /></span>
             <span className="flex flex-col">
-              <span className="text-[10px] font-medium text-slate-400">Talk to an expert</span>
+              <span className="text-[11px] font-medium text-red-400">+91 70916 66198</span>
               <span className="text-xs font-bold text-slate-800">Contact us</span>
             </span>
           </a>

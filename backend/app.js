@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
@@ -43,6 +43,7 @@ app.get("/api/config/google-auth", (req, res) => {
 
 
 app.use("/api/auth", require("./modules/auth/auth.routes"));
+app.use("/api/contact", require("./modules/contact/contact.routes"));
 
 app.put(
   "/api/auth/change-password",
@@ -56,6 +57,8 @@ app.use("/api/admin", require("./modules/admin/admin.routes"));
 app.use("/api/team", require("./modules/admin/features/team/team.routes"));
 
 app.use("/api/properties", require("./modules/seller/features/properties/properties.routes"));
+
+app.use("/api/gallery", require("./modules/gallery/gallery.routes"));
 
 app.use((req, res) => {
   res.status(404).json({
@@ -78,6 +81,7 @@ app.use((err, req, res, next) => {
 });
 
 module.exports = app;
+
 
 
 

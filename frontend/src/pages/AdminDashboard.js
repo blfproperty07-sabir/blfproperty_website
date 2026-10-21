@@ -1,4 +1,6 @@
+import { LayoutDashboard, Building2, House, Users, Mail, UserRound, Image, ChartNoAxesColumnIncreasing, Clock, CheckCircle2 } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import GalleryManager from '../components/admin/GalleryManager';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import adminService from '../services/adminService';
@@ -181,7 +183,7 @@ const AdminDashboard = () => {
         sortOrder: 'desc'
       });
       
-      const inquiries = response.data?.inquiries || [];
+      const inquiries = response.inquiries || response.data?.inquiries || [];
       setInquiries(inquiries);
       
       // Calculate stats
@@ -468,13 +470,14 @@ const AdminDashboard = () => {
   }
 
   const tabMenu = [
-    { id: 'overview', label: 'Overview', icon: '📊' },
-    { id: 'properties', label: 'Properties', icon: '🏠' },
-    { id: 'rentals', label: 'Rental Properties', icon: '🏘️' },
-    { id: 'team', label: 'Team Management', icon: '👥' },
-    { id: 'contacts', label: 'Contact Inquiries', icon: '📧' },
-    { id: 'users', label: 'User Management', icon: '👤' },
-    { id: 'analytics', label: 'Analytics', icon: '📈' }
+    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { id: 'properties', label: 'Properties', icon: Building2 },
+    { id: 'rentals', label: 'Rental Properties', icon: House },
+    { id: 'team', label: 'Team Management', icon: Users },
+    { id: 'contacts', label: 'Contact Inquiries', icon: Mail },
+    { id: 'users', label: 'User Management', icon: UserRound },
+    { id: 'gallery', label: 'Gallery', icon: Image },
+    { id: 'analytics', label: 'Analytics', icon: ChartNoAxesColumnIncreasing }
   ];
 
   return (
@@ -510,7 +513,7 @@ const AdminDashboard = () => {
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
-                <span className="text-lg">{tab.icon}</span>
+                <span className="text-lg"><tab.icon size={18} className="mr-2 shrink-0" /></span>
                 <span className="font-medium whitespace-nowrap">{tab.label}</span>
               </button>
             ))}
@@ -530,9 +533,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-medium text-gray-600">Total Properties</p>
                     <p className="text-3xl font-bold text-gray-900">{stats.totalProperties}</p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">🏠</span>
-                  </div>
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><Building2 size={22} className="text-blue-600" /></div>
                 </div>
               </div>
 
@@ -542,9 +543,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-medium text-gray-600">Pending Approval</p>
                     <p className="text-3xl font-bold text-orange-600">{stats.pendingProperties}</p>
                   </div>
-                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">⏳</span>
-                  </div>
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"><Clock size={22} className="text-orange-600" /></div>
                 </div>
               </div>
 
@@ -554,9 +553,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-medium text-gray-600">Total Users</p>
                     <p className="text-3xl font-bold text-green-600">{stats.totalUsers}</p>
                   </div>
-                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">👤</span>
-                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><Users size={22} className="text-green-600" /></div>
                 </div>
               </div>
 
@@ -566,9 +563,7 @@ const AdminDashboard = () => {
                     <p className="text-sm font-medium text-gray-600">Team Members</p>
                     <p className="text-3xl font-bold text-purple-600">{stats.totalTeamMembers}</p>
                   </div>
-                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">👥</span>
-                  </div>
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"><Users size={22} className="text-purple-600" /></div>
                 </div>
               </div>
             </div>
@@ -581,11 +576,11 @@ const AdminDashboard = () => {
                   {Array.isArray(pendingProperties) && pendingProperties.slice(0, 5).map((property, index) => (
                     <div key={property._id || index} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
-                        <span className="text-lg">🏠</span>
+                        <span className="text-lg">S </span>
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{property.title || `Property ${index + 1}`}</p>
-                        <p className="text-sm text-gray-600">{property.location?.city || 'Mumbai'}</p>
+                                <div>Location: {property.location?.city}, {property.location?.state}</div>
                       </div>
                       <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
                         Pending
@@ -595,7 +590,7 @@ const AdminDashboard = () => {
                   {(!Array.isArray(pendingProperties) || pendingProperties.length === 0) && (
                     <div className="text-center py-8">
                       <div className="text-4xl mb-2">🏠</div>
-                      <p className="text-gray-600">No pending properties</p>
+      <p className="text-gray-600">No pending properties</p>
                     </div>
                   )}
                 </div>
@@ -607,7 +602,7 @@ const AdminDashboard = () => {
                   {Array.isArray(teamMembers) && teamMembers.slice(0, 5).map((member, index) => (
                     <div key={member._id || index} className="flex items-center space-x-4 p-3 hover:bg-gray-50 rounded-lg">
                       <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                        <span className="text-lg">👤</span>
+                        <span className="text-lg">P</span>
                       </div>
                       <div className="flex-1">
                         <p className="font-medium text-gray-900">{member.name || `Team Member ${index + 1}`}</p>
@@ -621,7 +616,7 @@ const AdminDashboard = () => {
                   {(!Array.isArray(teamMembers) || teamMembers.length === 0) && (
                     <div className="text-center py-8">
                       <div className="text-4xl mb-2">👥</div>
-                      <p className="text-gray-600">No team members found</p>
+      <p className="text-gray-600">No team members found</p>
                     </div>
                   )}
                 </div>
@@ -673,7 +668,7 @@ const AdminDashboard = () => {
                     </div>
                   ) : (!Array.isArray(pendingProperties) || pendingProperties.length === 0) ? (
                     <div className="text-center py-12">
-                      <div className="text-6xl mb-4">✅</div>
+                      <div className="mb-4 flex justify-center"><CheckCircle2 size={48} className="text-green-500" /></div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
                       <p className="text-gray-600">No pending properties to review</p>
                     </div>
@@ -692,11 +687,11 @@ const AdminDashboard = () => {
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                   <p className="text-sm text-gray-500">Location</p>
-                                  <p className="font-medium">{property.location?.city}, {property.location?.state}</p>
+                                <div>Location: {property.location?.city}, {property.location?.state}</div>
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500">Price</p>
-                                  <p className="font-medium">₹{property.price?.amount?.toLocaleString()}</p>
+                                  <p className="font-medium">Rs. {property.price?.amount?.toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500">Type</p>
@@ -705,8 +700,8 @@ const AdminDashboard = () => {
                               </div>
                               <div className="mb-4">
                                 <p className="text-sm text-gray-500">Owner Details</p>
-                                <p className="font-medium">{property.owner?.name} • {property.owner?.email}</p>
-                                <p className="text-sm text-gray-600">📞 {property.owner?.phone}</p>
+                                <p className="font-medium">{property.owner?.name} | {property.owner?.email}</p>
+                                <p className="text-sm text-gray-600">Phone: {property.owner?.phone}</p>
                               </div>
                               <p className="text-gray-600 text-sm">{property.description}</p>
                             </div>
@@ -715,19 +710,19 @@ const AdminDashboard = () => {
                                 onClick={() => handlePropertyApproval(property._id, 'approve')}
                                 className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors min-w-[100px]"
                               >
-                                ✓ Approve
+                                OK Approve
                               </button>
                               <button
                                 onClick={() => handlePropertyApproval(property._id, 'reject')}
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors min-w-[100px]"
                               >
-                                ✗ Reject
+                                X Reject
                               </button>
                               <button
                                 onClick={() => handleDeleteProperty(property._id)}
                                 className="bg-gray-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors min-w-[100px]"
                               >
-                                🗑 Delete
+                                Delete
                               </button>
                             </div>
                           </div>
@@ -751,7 +746,7 @@ const AdminDashboard = () => {
                     </div>
                   ) : (!Array.isArray(allProperties) || allProperties.length === 0) ? (
                     <div className="text-center py-12">
-                      <div className="text-6xl mb-4">🏠</div>
+                      <div className="text-6xl mb-4">O</div>
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Properties Found</h3>
                       <p className="text-gray-600">No properties in the system yet</p>
                     </div>
@@ -770,18 +765,18 @@ const AdminDashboard = () => {
                                     ? 'bg-orange-100 text-orange-800'
                                     : 'bg-red-100 text-red-800'
                                 }`}>
-                                  {property.status === 'approved' ? '✓ Approved' : 
-                                   property.status === 'pending' ? 'Pending Review' : '✗ Rejected'}
+                                  {property.status === 'approved' ? 'OK Approved' : 
+                                   property.status === 'pending' ? 'Pending Review' : 'X Rejected'}
                                 </span>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                 <div>
                                   <p className="text-sm text-gray-500">Location</p>
-                                  <p className="font-medium">{property.location?.city}, {property.location?.state}</p>
+                                <div>Location: {property.location?.city}, {property.location?.state}</div>
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500">Price</p>
-                                  <p className="font-medium">₹{property.price?.amount?.toLocaleString()}</p>
+                                  <p className="font-medium">Rs. {property.price?.amount?.toLocaleString()}</p>
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500">Type</p>
@@ -790,8 +785,8 @@ const AdminDashboard = () => {
                               </div>
                               <div className="mb-4">
                                 <p className="text-sm text-gray-500">Owner Details</p>
-                                <p className="font-medium">{property.owner?.name} • {property.owner?.email}</p>
-                                <p className="text-sm text-gray-600">📞 {property.owner?.phone}</p>
+                                <p className="font-medium">{property.owner?.name} | {property.owner?.email}</p>
+                                <p className="text-sm text-gray-600">Phone: {property.owner?.phone}</p>
                               </div>
                               <p className="text-gray-600 text-sm">{property.description}</p>
                             </div>
@@ -802,13 +797,13 @@ const AdminDashboard = () => {
                                     onClick={() => handlePropertyApproval(property._id, 'approve')}
                                     className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors min-w-[100px]"
                                   >
-                                    ✓ Approve
+                                    OK Approve
                                   </button>
                                   <button
                                     onClick={() => handlePropertyApproval(property._id, 'reject')}
                                     className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors min-w-[100px]"
                                   >
-                                    ✗ Reject
+                                    X Reject
                                   </button>
                                 </>
                               )}
@@ -817,7 +812,7 @@ const AdminDashboard = () => {
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors min-w-[100px]"
                                 title="Delete property (typically after it's sold)"
                               >
-                                🗑 Delete (Sold)
+                                 Delete (Sold)
                               </button>
                             </div>
                           </div>
@@ -856,7 +851,7 @@ const AdminDashboard = () => {
                   </div>
                 ) : (!Array.isArray(teamMembers) || teamMembers.length === 0) ? (
                   <div className="text-center py-12">
-                    <div className="text-6xl mb-4">👥</div>
+                    <div className="flex justify-center mb-4"><Users size={56} className="text-gray-400" /></div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No team members yet</h3>
                     <p className="text-gray-600">Add your first team member to get started</p>
                   </div>
@@ -877,9 +872,9 @@ const AdminDashboard = () => {
                                 }}
                               />
                             ) : (
-                              <span className="text-2xl text-gray-600">👤</span>
+                              <span className="text-2xl text-gray-600">P</span>
                             )}
-                            <span className="text-2xl text-gray-600" style={{display: 'none'}}>👤</span>
+                            <span className="text-2xl text-gray-600" style={{display: 'none'}}>P</span>
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
@@ -895,8 +890,8 @@ const AdminDashboard = () => {
                           </div>
                         </div>
                         <div className="space-y-2 text-sm mb-4">
-                          <p className="text-gray-600 truncate">📧 {member.email}</p>
-                          <p className="text-gray-600">📞 {member.phone}</p>
+                          <p className="text-gray-600 truncate">P {member.email}</p>
+                          <p className="text-gray-600">Z {member.phone}</p>
                           {member.joiningDate && (
                             <p className="text-gray-500 text-xs">
                               Joined: {new Date(member.joiningDate).toLocaleDateString()}
@@ -1075,7 +1070,7 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-bold text-gray-900">{inquiriesStats.total}</p>
                   </div>
                   <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
-                    📧
+                    P
                   </div>
                 </div>
               </div>
@@ -1086,7 +1081,7 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-bold text-orange-600">{inquiriesStats.new}</p>
                   </div>
                   <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
-                    🆕
+                    O
                   </div>
                 </div>
               </div>
@@ -1097,7 +1092,7 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-bold text-yellow-600">{inquiriesStats.inProgress}</p>
                   </div>
                   <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
-                    ⏳
+                    A
                   </div>
                 </div>
               </div>
@@ -1108,7 +1103,7 @@ const AdminDashboard = () => {
                     <p className="text-2xl font-bold text-green-600">{inquiriesStats.resolved}</p>
                   </div>
                   <div className="bg-green-100 text-green-600 p-3 rounded-lg">
-                    ✅
+                    AE
                   </div>
                 </div>
               </div>
@@ -1132,7 +1127,7 @@ const AdminDashboard = () => {
                   </div>
                 ) : inquiries.length === 0 ? (
                   <div className="text-center py-12">
-                    <div className="text-6xl mb-4">📧</div>
+                    <div className="text-6xl mb-4">P</div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No inquiries yet</h3>
                     <p className="text-gray-600">Contact inquiries will appear here when submitted</p>
                   </div>
@@ -1301,7 +1296,7 @@ const AdminDashboard = () => {
                       if (filteredRentals.length === 0) {
                         return (
                           <div className="text-center py-12">
-                            <div className="text-6xl mb-4">🏘️</div>
+                            <div className="text-6xl mb-4">P</div>
                             <h3 className="text-lg font-medium text-gray-900 mb-2">
                               {rentalsSubTab === 'all' ? 'No rental properties yet' : 
                                rentalsSubTab === 'pending' ? 'No pending rental properties' :
@@ -1335,15 +1330,15 @@ const AdminDashboard = () => {
                               </div>
                               
                               <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
-                                <div>📍 {property.location?.city}, {property.location?.state}</div>
-                                <div>💰 ₹{property.price?.amount?.toLocaleString()}/month</div>
-                                <div>🏠 {property.type} • {property.features?.bedrooms || 0} BHK</div>
-                                <div>📐 {property.area?.size} {property.area?.unit}</div>
+                                <div>Location: {property.location?.city}, {property.location?.state}</div>
+                                <div>Rent: Rs. {property.price?.amount?.toLocaleString()}/month</div>
+                                <div>Type: {property.type} | {property.features?.bedrooms || 0} BHK</div>
+                                <div>S{property.area?.size} {property.area?.unit}</div>
                               </div>
                               
                               {property.owner && (
                                 <div className="text-sm text-gray-600 mb-2">
-                                  <strong>Owner:</strong> {property.owner.name} • {property.owner.email}
+                                  <strong>Owner:</strong> {property.owner.name} | {property.owner.email}
                                 </div>
                               )}
                               
@@ -1357,13 +1352,13 @@ const AdminDashboard = () => {
                                     onClick={() => handlePropertyApproval(property._id, 'approve')}
                                     className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors min-w-[100px]"
                                   >
-                                    ✓ Approve
+                                    OK Approve
                                   </button>
                                   <button
                                     onClick={() => handlePropertyApproval(property._id, 'reject')}
                                     className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors min-w-[100px]"
                                   >
-                                    ✗ Reject
+                                    X Reject
                                   </button>
                                 </>
                               )}
@@ -1372,7 +1367,7 @@ const AdminDashboard = () => {
                                 className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors min-w-[100px]"
                                 title="Delete property (typically after it's rented)"
                               >
-                                🗑 Delete (Rented)
+                                Delete (Rented)
                               </button>
                             </div>
                           </div>
@@ -1384,6 +1379,7 @@ const AdminDashboard = () => {
               </div>
             </div>
 
+            <GalleryManager />
             {/* Add Rental Property Modal */}
             {showAddRentalModal && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -1397,7 +1393,7 @@ const AdminDashboard = () => {
                         disabled={isAddingRental}
                         className="text-gray-400 hover:text-gray-600 text-xl"
                       >
-                        ✕
+                        âœ•
                       </button>
                     </div>
                   </div>
@@ -1437,7 +1433,7 @@ const AdminDashboard = () => {
 
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (₹) *</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Monthly Rent (Rs. ) *</label>
                           <input
                             type="number"
                             required
@@ -1449,7 +1445,7 @@ const AdminDashboard = () => {
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (₹)</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Security Deposit (Rs. )</label>
                           <input
                             type="number"
                             min="0"
@@ -1619,10 +1615,14 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {(activeTab === 'users' || activeTab === 'analytics') && (
+        {activeTab === 'gallery' && (
+  <div className="space-y-6"><GalleryManager /></div>
+)}
+
+      {(activeTab === 'users' || activeTab === 'analytics') && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100">
             <div className="p-6 text-center">
-              <div className="text-6xl mb-4">🚧</div>
+              <div className="text-6xl mb-4">■š§</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Coming Soon</h3>
               <p className="text-gray-600">This feature is under development</p>
             </div>
@@ -1634,3 +1634,5 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
+

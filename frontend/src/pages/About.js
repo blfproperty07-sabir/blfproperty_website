@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getTeamMemberImageUrl } from "../utils/imageUtils";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5001";
+const API_BASE = (process.env.REACT_APP_API_URL || "http://localhost:5001").replace(/\/+$/, "").replace(/\/api$/, "");
 
 const companyStats = [
   { value: "10+", label: "Years of Experience" },
@@ -635,7 +635,7 @@ const About = () => {
                 href="tel:+917033576717"
                 className="transition hover:text-amber-300"
               >
-                +91 7033576717
+                +91 70916 66198
               </a>
             </div>
           </div>

@@ -1,30 +1,28 @@
 // Format currency in Indian Rupees
-export const formatCurrency = (amount) => {
-  if (!amount) return '₹0';
-  
-  const numAmount = parseFloat(amount);
-  if (isNaN(numAmount)) return '₹0';
-  
-  // Format in Indian number system (lakhs, crores)
-  if (numAmount >= 10000000) {
-    return `₹${(numAmount / 10000000).toFixed(2)} Cr`;
-  } else if (numAmount >= 100000) {
-    return `₹${(numAmount / 100000).toFixed(2)} L`;
-  } else if (numAmount >= 1000) {
-    return `₹${(numAmount / 1000).toFixed(0)}K`;
-  }
-  
-  return `₹${numAmount.toLocaleString('en-IN')}`;
+export const formatCurrency = (price) => {
+  const amount = price && typeof price === "object" ? price.amount : price;
+  if (amount === null || amount === undefined || amount === "") return "Price on request";
+
+  const num = Number(amount);
+  if (!Number.isFinite(num) || num <= 0) return "Price on request";
+  if (num >= 10000000) return `\u20B9${(num / 10000000).toFixed(2)} Cr`;
+  if (num >= 100000) return `\u20B9${(num / 100000).toFixed(2)} L`;
+  if (num >= 1000) return `\u20B9${(num / 1000).toFixed(0)}K`;
+
+  return `\u20B9${num.toLocaleString("en-IN")}`;
 };
 
 // Format area
-export const formatArea = (area, unit = 'sqft') => {
-  if (!area) return '0 sqft';
-  
-  const numArea = parseFloat(area);
-  if (isNaN(numArea)) return '0 sqft';
-  
-  return `${numArea.toLocaleString('en-IN')} ${unit}`;
+export const formatArea = (area, defaultUnit = "sqft") => {
+  const size = area && typeof area === "object" ? area.size : area;
+  const unit = area && typeof area === "object" && area.unit ? area.unit : defaultUnit;
+
+  if (size === null || size === undefined || size === "") return "Area not specified";
+
+  const num = Number(size);
+  if (!Number.isFinite(num) || num <= 0) return "Area not specified";
+
+  return `${num.toLocaleString("en-IN")} ${unit}`;
 };
 
 // Format date

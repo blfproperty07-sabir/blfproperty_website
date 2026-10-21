@@ -142,12 +142,12 @@ const Home = () => {
   };
 
   const tabs = [
-    { name: 'Buy', icon: 'ðŸ ', active: activeTab === 'Buy' },
-    { name: 'Rent', icon: 'ðŸ¡', active: activeTab === 'Rent' },
-    { name: 'New Launch', icon: 'âœ¨', badge: 'NEW', active: activeTab === 'New Launch' },
-    { name: 'Commercial', icon: 'ðŸ¢', active: activeTab === 'Commercial' },
-    { name: 'Plots/Land', icon: 'ðŸŒ¿', active: activeTab === 'Plots/Land' },
-    { name: 'Projects', icon: 'ðŸ—ï¸', active: activeTab === 'Projects' }
+    { name: 'Buy', icon: '├░┼╕┬Å┬á', active: activeTab === 'Buy' },
+    { name: 'Rent', icon: '├░┼╕┬Å┬í', active: activeTab === 'Rent' },
+    { name: 'New Launch', icon: '├ó┼ô┬¿', badge: 'NEW', active: activeTab === 'New Launch' },
+    { name: 'Commercial', icon: '├░┼╕┬Å┬ó', active: activeTab === 'Commercial' },
+    { name: 'Plots/Land', icon: '├░┼╕┼Æ┬┐', active: activeTab === 'Plots/Land' },
+    { name: 'Projects', icon: '├░┼╕┬ÅΓÇö├»┬╕┬Å', active: activeTab === 'Projects' }
   ];
 
   const categoryCards = [
@@ -156,7 +156,7 @@ const Home = () => {
       image: '/image/2bhk-modern-apartment.jpg',
       description: 'Find verified properties',
       link: '/properties?listingType=sale',
-      icon: 'ðŸ ',
+      icon: '├░┼╕┬Å┬á',
       gradient: 'from-blue-500 to-blue-600',
       stats: '2,500+ Properties'
     },
@@ -165,7 +165,7 @@ const Home = () => {
       image: '/image/3bhk-luxury-flat.jpg',
       description: 'Find rental properties',
       link: '/properties?listingType=rent',
-      icon: 'ðŸ¡',
+      icon: '├░┼╕┬Å┬í',
       gradient: 'from-green-500 to-green-600',
       stats: '1,200+ Rentals'
     },
@@ -174,7 +174,7 @@ const Home = () => {
       image: '/image/4bhk-villa.jpg',
       description: 'Best investment opportunities',
       link: '/properties?type=investment',
-      icon: 'ðŸ“ˆ',
+      icon: '├░┼╕ΓÇ£╦å',
       gradient: 'from-purple-500 to-purple-600',
       stats: '300+ Projects'
     },
@@ -183,7 +183,7 @@ const Home = () => {
       image: '/image/5bhk-independent-house.jpg',
       description: 'List your property',
       link: '/dashboard',
-      icon: 'ðŸ’°',
+      icon: '├░┼╕ΓÇÖ┬░',
       gradient: 'from-orange-500 to-orange-600',
       stats: 'Free Listing'
     },
@@ -192,7 +192,7 @@ const Home = () => {
       image: '/image/muz3.jpg',
       description: 'Buy/Sell land & plots',
       link: '/properties?type=plot',
-      icon: 'ðŸŒ¿',
+      icon: '├░┼╕┼Æ┬┐',
       gradient: 'from-yellow-500 to-yellow-600',
       stats: '800+ Plots'
     },
@@ -318,7 +318,7 @@ const Home = () => {
               >
                 <div className="relative h-48 shrink-0 overflow-hidden bg-gray-100 sm:h-52">
                   <PropertyImage
-                    image={property.images?.[0]}
+                    image={property.images?.[0]?.url || property.images?.[0]}
                     alt={property.title || 'Residential property'}
                     className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
                   />
@@ -351,14 +351,14 @@ const Home = () => {
                     <div className="rounded-xl border border-gray-100 bg-[#F8F9FC] px-3 py-3 text-center">
                       <p className="text-xs font-medium text-gray-500">Configuration</p>
                       <p className="mt-1.5 text-sm font-bold text-[#17213D]">
-                        {property.bedrooms || 3} BHK
+                        {property.features?.bedrooms ? property.features.bedrooms + " BHK" : "Configuration not specified"}
                       </p>
                     </div>
 
                     <div className="rounded-xl border border-gray-100 bg-[#F8F9FC] px-3 py-3 text-center">
                       <p className="text-xs font-medium text-gray-500">Area</p>
                       <p className="mt-1.5 text-sm font-bold text-[#17213D]">
-                        {formatArea(property.area) || '1,200 sqft'}
+                        {formatArea(property.area)}
                       </p>
                     </div>
                   </div>
@@ -400,3 +400,4 @@ const Home = () => {
 };
 
 export default Home;
+
