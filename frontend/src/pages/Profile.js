@@ -15,7 +15,6 @@ const Profile = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const isGoogleAccount = Boolean(user?.googleId);
   const [loading, setLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
@@ -326,7 +325,6 @@ const Profile = () => {
 };
 
 export default Profile;
-
 
 
 
